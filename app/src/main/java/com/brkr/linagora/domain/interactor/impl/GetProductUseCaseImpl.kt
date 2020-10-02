@@ -11,10 +11,7 @@ class GetProductUseCaseImpl : GetProductUseCase, KoinComponent {
 
     private val productRepository: ProductRepository by inject()
 
-    override suspend fun execute(param: GetProductParam): Product? {
-        //The result should return 0 or 1 result
-        val products = productRepository.findProductById(param.id)
-        return if (products.isEmpty()) null
-        else products.first()
+    override suspend fun execute(param: GetProductParam): Product {
+        return productRepository.findProductById(param.id)
     }
 }

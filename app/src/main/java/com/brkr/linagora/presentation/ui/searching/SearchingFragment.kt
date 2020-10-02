@@ -3,7 +3,7 @@ package com.brkr.linagora.presentation.ui.searching
 import android.view.View
 import android.view.inputmethod.EditorInfo
 import com.brkr.linagora.R
-import com.brkr.linagora.domain.model.User
+import com.brkr.linagora.domain.model.Purchase
 import com.brkr.linagora.presentation.ui.base.BaseFragment
 import com.brkr.linagora.presentation.utils.ui
 import com.brkr.linagora.presentation.utils.value
@@ -15,6 +15,8 @@ class SearchingFragment : BaseFragment() {
     override var layoutId: Int = R.layout.fragment_searching
 
     private val viewModel: SearchingViewModel by viewModel()
+
+    private val purchaseItems = mutableListOf<PurchaseItem>()
 
     override fun initViews() {
         //Pass
@@ -39,16 +41,30 @@ class SearchingFragment : BaseFragment() {
     private fun searchByUsername() = ui {
         val username = edtUsername.value()
         showLoading()
-        val result = viewModel.getUserByUsernameAsync(username).await()
-        hideLoading()
-        handleSearchingResult(result)
-    }
 
-    private fun handleSearchingResult(result: User?) {
+        //Check if username is exist.
+        val result = viewModel.getUserByUsernameAsync(username).await()
         result ?: run {
             showToast(R.string.user_not_found)
-            return
+            return@ui
         }
+
+        //Fetch 5 recent purchased
+        val recentPurchase = viewModel.getRecentPurchaseAsync(username).await()
+        getProductDetails(recentPurchase)
+    }
+
+    private suspend fun getProductDetails(recentPurchase: List<Purchase>) {
+        recentPurchase.forEach { purchase ->
+            //Get buyer
+            val purchaseByProduct = viewModel.getPurchaseByProduct(purchase.productId).await()
+            //Get details
+            val productDetails = viewModel.getProductDetails(purchase.productId).await()
+            //Add to list item
+            val usernames = purchaseByProduct.map { it.username }
+            purchaseItems.add(PurchaseItem(purchase, productDetails, usernames))
+        }
+        purchaseItems.sortByDescending { it.details.price }
     }
 
     override fun onClick(p0: View?) {

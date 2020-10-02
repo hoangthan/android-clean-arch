@@ -10,7 +10,7 @@ class ProductRepositoryImpl : ProductRepository, KoinComponent {
 
     private val restApi: RestApi by inject()
 
-    override fun findProductById(id: Int): List<Product> {
-        return listOf()
+    override suspend fun findProductById(id: Int): Product {
+        return restApi.getProductDetails(id).product.toProduct()
     }
 }
