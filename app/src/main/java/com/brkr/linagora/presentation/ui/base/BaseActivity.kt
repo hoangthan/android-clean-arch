@@ -3,14 +3,9 @@ package com.brkr.linagora.presentation.ui.base
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
-import android.view.View.GONE
-import android.view.View.VISIBLE
-import android.widget.Toast
 import androidx.activity.viewModels
-import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
-
 
 abstract class BaseActivity : AppCompatActivity(), View.OnClickListener {
     /**
@@ -40,6 +35,7 @@ abstract class BaseActivity : AppCompatActivity(), View.OnClickListener {
      */
     abstract fun initViews()
 
+
     /**
      * Initialize loading view
      */
@@ -60,12 +56,19 @@ abstract class BaseActivity : AppCompatActivity(), View.OnClickListener {
 
 
     /**
-     * Init view, dataviews, listener, loading state observer.
+     * Set theme and view layout
      */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setTheme(themeId)
         setContentView(layoutId)
+    }
+
+    /**
+     * Init view, dataviews, listener, loading state observer.
+     * */
+    override fun onStart() {
+        super.onStart()
         initViews()
         initLoadingView()
         initViewListeners()
@@ -78,11 +81,17 @@ abstract class BaseActivity : AppCompatActivity(), View.OnClickListener {
      */
     private fun loadingViewObserver() {
         sharedViewModel.isLoading.observe(this, { isLoading ->
-            if (::loadingView.isInitialized) {
-                showToast("ahihihi")
-                loadingView.isVisible = true
-            }
+            if (isLoading) showLoading()
+            else hideLoading()
         })
+    }
+
+    fun showLoading() {
+        loadingView.isVisible = true
+    }
+
+    fun hideLoading() {
+        loadingView.isVisible = false
     }
 
     /**
@@ -99,23 +108,5 @@ abstract class BaseActivity : AppCompatActivity(), View.OnClickListener {
         if (bundle != null) intent.putExtras(bundle)
         startActivity(intent)
         if (isCloseCurrentActivity) finish()
-    }
-
-
-    /**
-     * Show notification with text and duration was passed in.
-     */
-    fun showToast(@StringRes stringId: Int, isLong: Boolean = false) {
-        val duration = if (isLong) Toast.LENGTH_LONG else Toast.LENGTH_SHORT
-        Toast.makeText(this, stringId, duration).show()
-    }
-
-    /**
-     * Show notification with text and duration was passed in.
-     */
-    fun showToast(content: String?, isLong: Boolean = false) {
-        content ?: return
-        val duration = if (isLong) Toast.LENGTH_LONG else Toast.LENGTH_SHORT
-        Toast.makeText(this, content, duration).show()
     }
 }

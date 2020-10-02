@@ -20,9 +20,7 @@ class MainActivity : BaseActivity() {
     }
 
     override fun initLoadingView() {
-        this.loadingView = progress_circular
-        progress_circular.visibility = View.GONE
-
+        this.loadingView = loading_view
     }
 
     override fun initViewListeners() {
