@@ -4,7 +4,8 @@ import android.view.View
 import android.view.inputmethod.EditorInfo
 import com.brkr.linagora.R
 import com.brkr.linagora.presentation.ui.base.BaseFragment
-import com.brkr.linagora.presentation.ui.searching.ProductDetailsFragment.Companion.TAG
+import com.brkr.linagora.presentation.ui.product.ProductDetailsFragment
+import com.brkr.linagora.presentation.ui.product.ProductDetailsFragment.Companion.TAG
 import com.brkr.linagora.presentation.utils.ui
 import com.brkr.linagora.presentation.utils.value
 import kotlinx.android.synthetic.main.fragment_searching.*

@@ -1,4 +1,4 @@
-package com.brkr.linagora.presentation.ui.searching
+package com.brkr.linagora.presentation.ui.product
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import com.brkr.linagora.R
 import com.brkr.linagora.databinding.FragmentProductDetailsBinding
 import com.brkr.linagora.presentation.ui.base.BaseFragment
+import com.brkr.linagora.presentation.ui.searching.PurchaseItem
 
 class ProductDetailsFragment(
     private val purchaseItem: PurchaseItem
