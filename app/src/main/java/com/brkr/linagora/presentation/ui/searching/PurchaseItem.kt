@@ -10,10 +10,6 @@ data class PurchaseItem(
 ) {
 
     fun getBuyerName(): String {
-        return "Purchased by: " + users.joinToString(" ,")
-    }
-
-    fun getPrice(): String {
-        return "Price: " + this.product.price
+        return users.joinToString(" ,")
     }
 }

@@ -36,14 +36,14 @@
                 android:id="@+id/tvPrice"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@{purchaseItem.price}"
+                android:text="@{`Price: ` +purchaseItem.product.price}"
                 tools:text="@string/app_name" />
 
             <TextView
                 android:id="@+id/tvRecentBuyer"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@{purchaseItem.buyerName}"
+                android:text="@{`Purchased: ` + purchaseItem.buyerName}"
                 tools:text="@string/app_name" />
 
         </LinearLayout>

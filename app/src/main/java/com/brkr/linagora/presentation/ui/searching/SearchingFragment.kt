@@ -4,6 +4,7 @@ import android.view.View
 import android.view.inputmethod.EditorInfo
 import com.brkr.linagora.R
 import com.brkr.linagora.presentation.ui.base.BaseFragment
+import com.brkr.linagora.presentation.ui.searching.ProductDetailsFragment.Companion.TAG
 import com.brkr.linagora.presentation.utils.ui
 import com.brkr.linagora.presentation.utils.value
 import kotlinx.android.synthetic.main.fragment_searching.*
@@ -54,19 +55,30 @@ class SearchingFragment : BaseFragment() {
         if (recentPurchase.isEmpty()) {
             showToast(R.string.purchase_not_found)
         } else {
-            viewModel.loadPurchaseItemDetails(recentPurchase).await()
+            viewModel.loadPurchaseItemDetailsAsync(recentPurchase).await()
         }
         hideLoading()
     }
 
     private fun updatePurchaseView(purchaseItems: List<PurchaseItem>) {
-        val purchaseAdapter = PurchaseAdapter(purchaseItems) {
-            showToast("" + it)
-        }
+        //Create purchase adapter and set callback when item is clicked
+        val purchaseAdapter = PurchaseAdapter(purchaseItems) { handleOnItemClicked(it) }
+
+        //Set adapter for recycler view.
         rcvPurchase.apply {
             this.setHasFixedSize(true)
             this.adapter = purchaseAdapter
         }
+    }
+
+    private fun handleOnItemClicked(position: Int) {
+        val product = viewModel.purchaseItemsLiveData.value?.get(position)
+        product ?: return
+        requireActivity().supportFragmentManager
+            .beginTransaction()
+            .addToBackStack(null)
+            .add(R.id.fragmentContainerView, ProductDetailsFragment(product), TAG)
+            .commit()
     }
 
     override fun onClick(p0: View?) {

@@ -26,8 +26,6 @@ class SearchingViewModel : ViewModel(), KoinComponent {
     private val getPurchaseByProductUseCase: GetPurchaseByProductUseCase by inject()
     private val getProductUseCase: GetProductUseCase by inject()
 
-    val PURCHASE_FETCH_LIMIT = 5
-
     val purchaseItemsLiveData = MutableLiveData<List<PurchaseItem>>()
 
     fun getUserByUsernameAsync(username: String) = viewModelScope.async(IO) {
@@ -56,7 +54,7 @@ class SearchingViewModel : ViewModel(), KoinComponent {
             getPurchaseByProductUseCase.execute(param)
         }
 
-    fun loadPurchaseItemDetails(recentPurchase: List<Purchase>) = viewModelScope.async {
+    fun loadPurchaseItemDetailsAsync(recentPurchase: List<Purchase>) = viewModelScope.async(IO) {
         val purchaseItems = mutableListOf<PurchaseItem>()
         recentPurchase.forEach { purchase ->
             //Get buyer
@@ -64,10 +62,16 @@ class SearchingViewModel : ViewModel(), KoinComponent {
             //Get details
             val productDetails = getProductDetails(purchase.productId)
             //Add to list item
-            val usernames = purchaseByProduct.map { it.username }
-            purchaseItems.add(PurchaseItem(purchase, productDetails, usernames))
+            val buyerUsername = purchaseByProduct.map { it.username }
+            purchaseItems.add(PurchaseItem(purchase, productDetails, buyerUsername))
         }
+
+        //Sorting by product price order desc, then assign to liveData
         purchaseItems.sortByDescending { it.product.price }
-        purchaseItemsLiveData.value = purchaseItems
+        purchaseItemsLiveData.postValue(purchaseItems)
+    }
+
+    companion object {
+        const val PURCHASE_FETCH_LIMIT = 5
     }
 }
