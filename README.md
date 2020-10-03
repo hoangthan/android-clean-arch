@@ -1,5 +1,5 @@
 # Linagora
-Android application apply clean architecture with MVVM
+## Android application apply clean architecture with MVVM
 
   - Clean architecture with MVVM
   - Using Coroutine and retrofit for calling asynchronous restful API
