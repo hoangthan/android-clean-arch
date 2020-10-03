@@ -1,5 +1,6 @@
 package com.brkr.linagora.presentation.ui.searching
 
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.brkr.linagora.domain.interactor.GetProductUseCase
@@ -10,20 +11,24 @@ import com.brkr.linagora.domain.interactor.GetPurchaseByUserUseCase
 import com.brkr.linagora.domain.interactor.GetPurchaseByUserUseCase.GetPurchaseParam
 import com.brkr.linagora.domain.interactor.GetUserUseCase
 import com.brkr.linagora.domain.interactor.GetUserUseCase.GetUserParam
+import com.brkr.linagora.domain.model.Purchase
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.async
 import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.withContext
 import org.koin.core.KoinComponent
 import org.koin.core.inject
 
 class SearchingViewModel : ViewModel(), KoinComponent {
 
-    val PURCHASE_FETCH_LIMIT = 5
-
     private val getUserUseCase: GetUserUseCase by inject()
     private val getPurchaseByUserUseCase: GetPurchaseByUserUseCase by inject()
     private val getPurchaseByProductUseCase: GetPurchaseByProductUseCase by inject()
     private val getProductUseCase: GetProductUseCase by inject()
+
+    val PURCHASE_FETCH_LIMIT = 5
+
+    val purchaseItemsLiveData = MutableLiveData<List<PurchaseItem>>()
 
     fun getUserByUsernameAsync(username: String) = viewModelScope.async(IO) {
         viewModelScope.ensureActive()
@@ -37,15 +42,32 @@ class SearchingViewModel : ViewModel(), KoinComponent {
         getPurchaseByUserUseCase.execute(param)
     }
 
-    fun getProductDetails(productId: Int) = viewModelScope.async {
-        viewModelScope.ensureActive()
-        val param = GetProductParam(productId)
-        getProductUseCase.execute(param)
-    }
+    private suspend fun getProductDetails(productId: Int) =
+        withContext(viewModelScope.coroutineContext) {
+            viewModelScope.ensureActive()
+            val param = GetProductParam(productId)
+            getProductUseCase.execute(param)
+        }
 
-    fun getPurchaseByProduct(productId: Int) = viewModelScope.async {
-        viewModelScope.ensureActive()
-        val param = PurchaseProductParam(productId)
-        getPurchaseByProductUseCase.execute(param)
+    private suspend fun getPurchaseByProduct(productId: Int) =
+        withContext(viewModelScope.coroutineContext) {
+            viewModelScope.ensureActive()
+            val param = PurchaseProductParam(productId)
+            getPurchaseByProductUseCase.execute(param)
+        }
+
+    fun loadPurchaseItemDetails(recentPurchase: List<Purchase>) = viewModelScope.async {
+        val purchaseItems = mutableListOf<PurchaseItem>()
+        recentPurchase.forEach { purchase ->
+            //Get buyer
+            val purchaseByProduct = getPurchaseByProduct(purchase.productId)
+            //Get details
+            val productDetails = getProductDetails(purchase.productId)
+            //Add to list item
+            val usernames = purchaseByProduct.map { it.username }
+            purchaseItems.add(PurchaseItem(purchase, productDetails, usernames))
+        }
+        purchaseItems.sortByDescending { it.product.price }
+        purchaseItemsLiveData.value = purchaseItems
     }
 }

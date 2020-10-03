@@ -3,7 +3,6 @@ package com.brkr.linagora.presentation.ui.searching
 import android.view.View
 import android.view.inputmethod.EditorInfo
 import com.brkr.linagora.R
-import com.brkr.linagora.domain.model.Purchase
 import com.brkr.linagora.presentation.ui.base.BaseFragment
 import com.brkr.linagora.presentation.utils.ui
 import com.brkr.linagora.presentation.utils.value
@@ -16,14 +15,14 @@ class SearchingFragment : BaseFragment() {
 
     private val viewModel: SearchingViewModel by viewModel()
 
-    private val purchaseItems = mutableListOf<PurchaseItem>()
-
     override fun initViews() {
         //Pass
     }
 
     override fun initDataObserver() {
-        //Pass
+        viewModel.purchaseItemsLiveData.observe(viewLifecycleOwner, {
+            updatePurchaseView(it)
+        })
     }
 
     override fun initViewListeners() {
@@ -45,26 +44,29 @@ class SearchingFragment : BaseFragment() {
         //Check if username is exist.
         val result = viewModel.getUserByUsernameAsync(username).await()
         result ?: run {
+            hideLoading()
             showToast(R.string.user_not_found)
             return@ui
         }
 
-        //Fetch 5 recent purchased
+        //Fetch recent purchases
         val recentPurchase = viewModel.getRecentPurchaseAsync(username).await()
-        getProductDetails(recentPurchase)
+        if (recentPurchase.isEmpty()) {
+            showToast(R.string.purchase_not_found)
+        } else {
+            viewModel.loadPurchaseItemDetails(recentPurchase).await()
+        }
+        hideLoading()
     }
 
-    private suspend fun getProductDetails(recentPurchase: List<Purchase>) {
-        recentPurchase.forEach { purchase ->
-            //Get buyer
-            val purchaseByProduct = viewModel.getPurchaseByProduct(purchase.productId).await()
-            //Get details
-            val productDetails = viewModel.getProductDetails(purchase.productId).await()
-            //Add to list item
-            val usernames = purchaseByProduct.map { it.username }
-            purchaseItems.add(PurchaseItem(purchase, productDetails, usernames))
+    private fun updatePurchaseView(purchaseItems: List<PurchaseItem>) {
+        val purchaseAdapter = PurchaseAdapter(purchaseItems) {
+            showToast("" + it)
         }
-        purchaseItems.sortByDescending { it.details.price }
+        rcvPurchase.apply {
+            this.setHasFixedSize(true)
+            this.adapter = purchaseAdapter
+        }
     }
 
     override fun onClick(p0: View?) {

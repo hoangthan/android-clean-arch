@@ -3,4 +3,5 @@
 
     <string name="enter_username">Enter your username: </string>
     <string name="user_not_found">User not found, please try again</string>
+    <string name="purchase_not_found">Purchase not found</string>
 </resources>

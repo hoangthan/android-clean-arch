@@ -82,4 +82,11 @@ abstract class BaseFragment : Fragment(), View.OnClickListener {
             Toast.makeText(context, stringId, duration).show()
         }
     }
+
+    fun showToast(message: String, isLong: Boolean = false) {
+        context?.run {
+            val duration = if (isLong) Toast.LENGTH_LONG else Toast.LENGTH_SHORT
+            Toast.makeText(context, message, duration).show()
+        }
+    }
 }

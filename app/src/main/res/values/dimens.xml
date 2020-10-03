@@ -2,5 +2,8 @@
 <resources>
 
     <dimen name="paddingRegular">16dp</dimen>
+    <dimen name="marginRegular">16dp</dimen>
 
+
+    <dimen name="textLarge">16sp</dimen>
 </resources>
